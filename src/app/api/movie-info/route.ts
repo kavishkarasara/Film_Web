@@ -16,7 +16,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.6-flash" });
 
     const prompt = `Provide the following details for the movie "${title}" in strict JSON format: 
     {
