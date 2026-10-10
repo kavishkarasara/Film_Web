@@ -64,11 +64,16 @@ function DownloadContent() {
         <FiDownloadCloud className="text-6xl text-primary mx-auto mb-6 drop-shadow-[0_0_15px_rgba(163,230,53,0.5)]" />
         <h1 className="text-3xl font-extrabold mb-4">Your Link is Almost Ready</h1>
         
-        {/* Middle Rectangle Ad */}
-        <div className="w-[300px] h-[250px] mx-auto bg-zinc-800/80 border border-zinc-700 rounded-lg flex flex-col items-center justify-center my-8 border-dashed">
-           <span className="text-zinc-500 font-semibold text-sm">Square Ad Space (300x250)</span>
-           <span className="text-xs text-zinc-600 mt-1">High CTR placement</span>
-        </div>
+        {/* Direct Link Ad */}
+        <a 
+          href="https://uplcm.com/4/11997794" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="w-[300px] mx-auto bg-blue-600 hover:bg-blue-500 border-2 border-blue-400 rounded-lg flex flex-col items-center justify-center my-8 p-6 transition-all shadow-[0_0_20px_rgba(37,99,235,0.4)] animate-pulse hover:animate-none cursor-pointer text-white"
+        >
+           <span className="font-extrabold text-xl mb-1">⚡ FAST DOWNLOAD</span>
+           <span className="text-xs text-blue-200">Recommended Secure Server</span>
+        </a>
 
         {!canDownload ? (
           <div className="space-y-4">
