@@ -25,6 +25,12 @@ export default function GlobalAds() {
   }
 
   return (
-    <Script id="monetag-ad" strategy="afterInteractive" dangerouslySetInnerHTML={{ __html: `(function(s){s.dataset.zone='11997259',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))` }} />
+    <>
+      {/* Adsterra Popunder */}
+      <Script id="adsterra-popunder" strategy="afterInteractive" src="https://aarems.org/1/97724ad1e94ee0de622d04ed566a58aa" data-cfasync="false" />
+      
+      {/* Adsterra Social Bar */}
+      <Script id="adsterra-socialbar" strategy="afterInteractive" src="https://bancadeltempoidea.org/14/c1785eedde6b693d4a26fcf573832135" data-cfasync="false" />
+    </>
   );
 }
