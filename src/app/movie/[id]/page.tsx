@@ -60,10 +60,9 @@ export default function MovieDetail() {
 
   return (
     <div className="min-h-screen bg-[#0f0f11] text-white font-sans relative">
-      {/* Background Backdrop */}
       <div className="absolute top-0 left-0 right-0 h-[80vh] overflow-hidden -z-10 pointer-events-none">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={movie.poster_url} alt="Backdrop" className="w-full h-full object-cover opacity-20 blur-3xl scale-110" />
+        <img src={movie.backdrop_url || movie.poster_url} alt="Backdrop" className="w-full h-full object-cover opacity-20 blur-3xl scale-110" />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0f0f11]/80 to-[#0f0f11]"></div>
       </div>
 

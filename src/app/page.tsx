@@ -109,7 +109,7 @@ export default function Home() {
             <div className="absolute inset-0 z-0">
                {/* eslint-disable-next-line @next/next/no-img-element */}
               <img 
-                src={slide.poster_url} 
+                src={slide.backdrop_url || slide.poster_url} 
                 alt={slide.title} 
                 className={`w-full h-full object-cover opacity-60 transition-transform duration-[10s] ease-out ${index === currentSlide ? 'scale-105' : 'scale-100'}`}
               />

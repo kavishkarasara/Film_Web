@@ -29,6 +29,7 @@ export default function AdminPanel() {
     title: "",
     desc: "",
     img: "",
+    backdrop: "",
     rating: "",
     year: "",
     tags: "",
@@ -69,6 +70,7 @@ export default function AdminPanel() {
       title: formData.title,
       description: formData.desc,
       poster_url: formData.img,
+      backdrop_url: formData.backdrop,
       tmdb_rating: parseFloat(formData.rating) || 0,
       release_year: formData.year,
       categories: tagsArray,
@@ -100,6 +102,7 @@ export default function AdminPanel() {
       title: "",
       desc: "",
       img: "",
+      backdrop: "",
       rating: "",
       year: "",
       tags: "",
@@ -129,6 +132,7 @@ export default function AdminPanel() {
       title: movie.title || "",
       desc: movie.description || "",
       img: movie.poster_url || "",
+      backdrop: movie.backdrop_url || "",
       rating: movie.tmdb_rating?.toString() || "",
       year: movie.release_year || "",
       tags: movie.categories ? movie.categories.join(", ") : "",
@@ -272,9 +276,15 @@ export default function AdminPanel() {
               <FiImage /> Media Assets
             </h3>
 
-            <div className="col-span-1 md:col-span-2">
-              <label className="block text-sm font-medium text-zinc-400 mb-2">Poster Image URL</label>
-              <input type="url" required value={formData.img} onChange={e => setFormData({ ...formData, img: e.target.value })} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="https://..." />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-2">Poster Image URL (Vertical)</label>
+                <input type="url" required value={formData.img} onChange={e => setFormData({ ...formData, img: e.target.value })} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="https://..." />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-2">Cover Photo URL (Horizontal - Optional)</label>
+                <input type="url" value={formData.backdrop} onChange={e => setFormData({ ...formData, backdrop: e.target.value })} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="https://..." />
+              </div>
             </div>
           </div>
 
@@ -304,7 +314,7 @@ export default function AdminPanel() {
                 type="button" 
                 onClick={() => {
                   setEditingMovieId(null);
-                  setFormData({ title: "", desc: "", img: "", rating: "", year: "", tags: "", link720p: "", link1080p: "", link4k: "", isHero: false });
+                  setFormData({ title: "", desc: "", img: "", backdrop: "", rating: "", year: "", tags: "", link720p: "", link1080p: "", link4k: "", isHero: false });
                 }}
                 className="bg-zinc-800 hover:bg-zinc-700 text-white px-8 py-3 rounded-lg font-bold transition-colors"
               >
