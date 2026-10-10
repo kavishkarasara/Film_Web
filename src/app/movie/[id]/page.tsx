@@ -11,6 +11,7 @@ export default function MovieDetail() {
   const params = useParams();
   const [activeSeason, setActiveSeason] = useState("Season 1");
   const [movie, setMovie] = useState<any>(null);
+  const [relatedMovies, setRelatedMovies] = useState<any[]>([]);
   const [scrolled, setScrolled] = useState(false);
   const [shareText, setShareText] = useState("Share");
 
@@ -38,6 +39,19 @@ export default function MovieDetail() {
         const { data } = await supabase.from('movies').select('*').eq('id', params.id).single();
         if (data) {
           setMovie(data);
+          // Fetch related movies based on the first category
+          if (data.categories && data.categories.length > 0) {
+            const { data: relatedData } = await supabase
+              .from('movies')
+              .select('*')
+              .neq('id', data.id)
+              .contains('categories', [data.categories[0]])
+              .limit(5);
+            
+            if (relatedData) {
+              setRelatedMovies(relatedData);
+            }
+          }
         }
       };
       fetchMovie();
@@ -60,10 +74,10 @@ export default function MovieDetail() {
 
   return (
     <div className="min-h-screen bg-[#0f0f11] text-white font-sans relative">
-      <div className="absolute top-0 left-0 right-0 h-[80vh] overflow-hidden -z-10 pointer-events-none">
+      <div className="absolute top-0 left-0 right-0 h-[70vh] overflow-hidden -z-10 pointer-events-none">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={movie.backdrop_url || movie.poster_url} alt="Backdrop" className="w-full h-full object-cover opacity-20 blur-3xl scale-110" />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0f0f11]/80 to-[#0f0f11]"></div>
+        <img src={movie.backdrop_url || movie.poster_url} alt="Backdrop" className="w-full h-full object-cover opacity-30 object-top" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0f0f11]/60 to-[#0f0f11]"></div>
       </div>
 
       {/* Navigation */}
@@ -160,45 +174,34 @@ export default function MovieDetail() {
 
 
 
-        {/* Screenshots Section */}
-        <div className="mb-20">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-            <span className="w-1 h-6 bg-primary rounded-full"></span> Movie Screenshots
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[1, 2, 3, 4, 5, 6].map((item) => (
-              <div key={item} className="aspect-video rounded-lg overflow-hidden bg-zinc-900 ring-1 ring-white/10 hover:ring-primary/50 transition-all cursor-zoom-in">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`https://picsum.photos/seed/${item * 10 + parseInt(movie.id)}/800/450`} alt={`Screenshot ${item}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
-              </div>
-            ))}
-          </div>
-        </div>
+
 
         {/* Ad Banner - Large Leaderboard */}
         <AdBanner className="h-32 mb-20 max-w-4xl mx-auto" />
 
         {/* You may also like Section */}
-        <div className="mb-20">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-            <span className="w-1 h-6 bg-primary rounded-full"></span> You may also like
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {[1, 2, 3, 4, 5].map((item) => (
-              <div key={item} className="cursor-pointer group">
-                <div className="aspect-[2/3] rounded-lg overflow-hidden relative mb-2 ring-1 ring-white/10 group-hover:ring-primary/50 transition-all">
-                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={`https://picsum.photos/seed/${item + 50 + parseInt(movie.id)}/400/600`} alt="Recommended" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                </div>
-                <h4 className="text-sm font-semibold truncate">Recommended Title {item}</h4>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[10px] font-bold bg-red-600 px-1.5 py-0.5 rounded">HD</span>
-                  <span className="text-xs text-zinc-400">Season 1</span>
-                </div>
-              </div>
-            ))}
+        {relatedMovies.length > 0 && (
+          <div className="mb-20">
+            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+              <span className="w-1 h-6 bg-primary rounded-full"></span> You may also like
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              {relatedMovies.map((item) => (
+                <Link href={`/movie/${item.id}`} key={item.id} className="cursor-pointer group block">
+                  <div className="aspect-[2/3] rounded-lg overflow-hidden relative mb-2 ring-1 ring-white/10 group-hover:ring-primary/50 transition-all">
+                     {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={item.poster_url} alt={item.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                  </div>
+                  <h4 className="text-sm font-semibold truncate group-hover:text-primary transition-colors">{item.title}</h4>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-[10px] font-bold bg-zinc-800 text-zinc-300 px-1.5 py-0.5 rounded">{item.release_year}</span>
+                    <span className="flex items-center gap-1 text-xs text-yellow-500"><FiStar className="fill-current"/> {item.tmdb_rating}</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Comments Section */}
         <div>

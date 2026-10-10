@@ -7,8 +7,8 @@ import { usePathname } from "next/navigation";
 export default function GlobalAds() {
   const pathname = usePathname();
 
-  // Show ads everywhere EXCEPT the home page ('/') and admin panel ('/admin')
-  const shouldShowAds = pathname !== '/' && !pathname?.startsWith('/admin');
+  // ONLY show ads on the download page
+  const shouldShowAds = pathname?.startsWith('/download');
 
   useEffect(() => {
     // Only register service worker if ads are allowed on this page
@@ -19,7 +19,7 @@ export default function GlobalAds() {
     }
   }, [shouldShowAds]);
 
-  // Disable ads on specific pages
+  // Disable ads on all other pages
   if (!shouldShowAds) {
     return null;
   }
