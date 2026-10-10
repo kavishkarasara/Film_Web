@@ -12,6 +12,17 @@ export default function MovieDetail() {
   const [activeSeason, setActiveSeason] = useState("Season 1");
   const [movie, setMovie] = useState<any>(null);
   const [scrolled, setScrolled] = useState(false);
+  const [shareText, setShareText] = useState("Share");
+
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setShareText("Copied!");
+      setTimeout(() => setShareText("Share"), 2000);
+    } catch (err) {
+      console.error("Failed to copy link");
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -78,8 +89,11 @@ export default function MovieDetail() {
           <div className="w-full md:w-2/3 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
             <div className="flex flex-col md:flex-row items-start justify-between mb-6 gap-4">
               <h1 className="text-5xl md:text-6xl font-bold uppercase tracking-tight">{movie.title}</h1>
-              <button className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-md font-semibold text-sm transition-colors flex items-center justify-center gap-2 border border-white/10 flex-shrink-0 mt-2 md:mt-0">
-                <FiShare2 /> Share
+              <button 
+                onClick={handleShare}
+                className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-md font-semibold text-sm transition-colors flex items-center justify-center gap-2 border border-white/10 flex-shrink-0 mt-2 md:mt-0"
+              >
+                {shareText === "Share" ? <FiShare2 /> : <FiStar className="text-primary fill-current" />} {shareText}
               </button>
             </div>
             

@@ -7,16 +7,19 @@ import { usePathname } from "next/navigation";
 export default function GlobalAds() {
   const pathname = usePathname();
 
+  const isDownloadPage = pathname?.startsWith('/download');
+
   useEffect(() => {
-    if (!pathname?.startsWith('/admin') && typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+    // Only register service worker on download page
+    if (isDownloadPage && typeof window !== 'undefined' && 'serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js')
         .then((reg) => console.log('Ad SW registered successfully.'))
         .catch((err) => console.error('Ad SW registration failed:', err));
     }
-  }, [pathname]);
+  }, [isDownloadPage]);
 
-  // Disable ads on the Admin Panel
-  if (pathname?.startsWith('/admin')) {
+  // Disable ads on all pages EXCEPT the download page
+  if (!isDownloadPage) {
     return null;
   }
 
