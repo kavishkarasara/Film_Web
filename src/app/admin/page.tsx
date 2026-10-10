@@ -1,14 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { FiLogOut, FiPlus, FiSave, FiImage, FiLink, FiFilm, FiCheckCircle } from "react-icons/fi";
+import { FiLogOut, FiPlus, FiSave, FiImage, FiLink, FiFilm, FiCheckCircle, FiStar, FiList } from "react-icons/fi";
+import { supabase } from "@/lib/supabase";
 
 export default function AdminPanel() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const [editingMovieId, setEditingMovieId] = useState<string | null>(null);
+  const [moviesList, setMoviesList] = useState<any[]>([]);
+
+  const fetchMovies = async () => {
+    const { data, error } = await supabase.from('movies').select('*').order('created_at', { ascending: false });
+    if (data) {
+      setMoviesList(data);
+    }
+  };
+
+  useEffect(() => {
+    fetchMovies();
+  }, []);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -20,24 +35,65 @@ export default function AdminPanel() {
     link720p: "",
     link1080p: "",
     link4k: "",
+    isHero: false,
   });
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === "Ka(20010514)ka") {
+    setError("");
+    
+    // Connect to actual Supabase Authentication
+    const { data, error: signInError } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: password,
+    });
+
+    if (signInError) {
+      setError(signInError.message);
+    } else if (data.session) {
       setIsAuthenticated(true);
-      setError("");
-    } else {
-      setError("Incorrect password. Please try again.");
     }
   };
 
-  const handleAddMovie = (e: React.FormEvent) => {
+  const handleAddMovie = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here normally we would send a POST request to an API route to update data.ts or a DB
-    console.log("Movie Data Submitted:", formData);
+    
+    const tagsArray = formData.tags.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag);
+    
+    const download_links = [];
+    if (formData.link720p) download_links.push({ quality: '720p', provider: 'other', url: formData.link720p, label: '720p' });
+    if (formData.link1080p) download_links.push({ quality: '1080p', provider: 'other', url: formData.link1080p, label: '1080p' });
+    if (formData.link4k) download_links.push({ quality: '4K', provider: 'other', url: formData.link4k, label: '4K' });
 
-    setSuccessMsg("Movie successfully added to the platform!");
+    const moviePayload = {
+      title: formData.title,
+      description: formData.desc,
+      poster_url: formData.img,
+      tmdb_rating: parseFloat(formData.rating) || 0,
+      release_year: formData.year,
+      categories: tagsArray,
+      download_links: download_links,
+      is_hero: formData.isHero,
+    };
+
+    if (editingMovieId) {
+      const { error } = await supabase.from('movies').update(moviePayload).eq('id', editingMovieId);
+      if (error) {
+        console.error(error);
+        alert("Failed to update movie: " + error.message);
+        return;
+      }
+      setSuccessMsg("Movie successfully updated!");
+    } else {
+      const { error } = await supabase.from('movies').insert([moviePayload]);
+      if (error) {
+        console.error(error);
+        alert("Failed to add movie: " + error.message);
+        return;
+      }
+      setSuccessMsg("Movie successfully added to the platform!");
+    }
+    
     setTimeout(() => setSuccessMsg(""), 3000);
 
     setFormData({
@@ -50,7 +106,38 @@ export default function AdminPanel() {
       link720p: "",
       link1080p: "",
       link4k: "",
+      isHero: false,
     });
+    setEditingMovieId(null);
+    fetchMovies();
+  };
+
+  const handleEditClick = (movie: any) => {
+    setEditingMovieId(movie.id);
+    
+    // Parse links back into form
+    let link720p = "", link1080p = "", link4k = "";
+    if (movie.download_links && Array.isArray(movie.download_links)) {
+      movie.download_links.forEach((link: any) => {
+        if (link.quality === '720p') link720p = link.url;
+        if (link.quality === '1080p') link1080p = link.url;
+        if (link.quality === '4K') link4k = link.url;
+      });
+    }
+
+    setFormData({
+      title: movie.title || "",
+      desc: movie.description || "",
+      img: movie.poster_url || "",
+      rating: movie.tmdb_rating?.toString() || "",
+      year: movie.release_year || "",
+      tags: movie.categories ? movie.categories.join(", ") : "",
+      link720p,
+      link1080p,
+      link4k,
+      isHero: movie.is_hero || false, 
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   if (!isAuthenticated) {
@@ -65,13 +152,22 @@ export default function AdminPanel() {
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
+              <label className="block text-sm font-medium text-zinc-400 mb-2">Admin Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-zinc-950 border border-zinc-700 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-primary/50 transition-all mb-4"
+                placeholder="Enter email"
+                required
+              />
               <label className="block text-sm font-medium text-zinc-400 mb-2">Admin Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full bg-zinc-950 border border-zinc-700 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                placeholder="Enter password (hint: admin123)"
+                placeholder="Enter password"
                 required
               />
             </div>
@@ -107,9 +203,11 @@ export default function AdminPanel() {
       <main className="max-w-4xl mx-auto py-12 px-6">
         <div className="mb-10">
           <h2 className="text-3xl font-bold mb-2 flex items-center gap-3">
-            <FiPlus className="text-primary" /> Add New Movie
+            <FiPlus className="text-primary" /> {editingMovieId ? "Edit Movie" : "Add New Movie"}
           </h2>
-          <p className="text-zinc-400">Fill in the details below to publish a new movie to the platform.</p>
+          <p className="text-zinc-400">
+            {editingMovieId ? "Update the details of the selected movie." : "Fill in the details below to publish a new movie to the platform."}
+          </p>
         </div>
 
         {successMsg && (
@@ -151,6 +249,20 @@ export default function AdminPanel() {
                 <label className="block text-sm font-medium text-zinc-400 mb-2">Genres / Tags (comma separated)</label>
                 <input type="text" required value={formData.tags} onChange={e => setFormData({ ...formData, tags: e.target.value })} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="Action, Sci-Fi, Thriller" />
               </div>
+
+              <div className="col-span-1 md:col-span-2 flex items-center gap-3 bg-zinc-950 p-4 rounded-lg border border-zinc-800 mt-2">
+                <input 
+                  type="checkbox" 
+                  id="isHero"
+                  checked={formData.isHero} 
+                  onChange={e => setFormData({ ...formData, isHero: e.target.checked })} 
+                  className="w-5 h-5 accent-primary cursor-pointer" 
+                />
+                <label htmlFor="isHero" className="text-sm font-medium text-white cursor-pointer flex items-center gap-2">
+                  <FiStar className={formData.isHero ? "text-primary" : "text-zinc-500"} /> 
+                  Show on Homepage Moving Slider (Hero Section)
+                </label>
+              </div>
             </div>
           </div>
 
@@ -186,13 +298,93 @@ export default function AdminPanel() {
             </div>
           </div>
 
-          <div className="pt-6 border-t border-zinc-800 flex justify-end">
+          <div className="pt-6 border-t border-zinc-800 flex justify-end gap-4">
+            {editingMovieId && (
+              <button 
+                type="button" 
+                onClick={() => {
+                  setEditingMovieId(null);
+                  setFormData({ title: "", desc: "", img: "", rating: "", year: "", tags: "", link720p: "", link1080p: "", link4k: "", isHero: false });
+                }}
+                className="bg-zinc-800 hover:bg-zinc-700 text-white px-8 py-3 rounded-lg font-bold transition-colors"
+              >
+                Cancel Edit
+              </button>
+            )}
             <button type="submit" className="bg-primary hover:bg-primary/90 text-white px-8 py-3 rounded-lg font-bold transition-transform hover:-translate-y-1 active:translate-y-0 flex items-center gap-2 shadow-[0_0_15px_rgba(225,29,72,0.3)]">
-              <FiSave /> Publish Movie
+              <FiSave /> {editingMovieId ? "Update Movie" : "Publish Movie"}
             </button>
           </div>
 
         </form>
+
+        {/* Added Movies Section */}
+        <div className="mt-16 mb-6">
+          <h2 className="text-2xl font-bold mb-2 flex items-center gap-3">
+            <FiList className="text-primary" /> Currently Added Movies
+          </h2>
+          <p className="text-zinc-400">Manage and view all the movies currently available on the platform.</p>
+        </div>
+
+        <div className="bg-zinc-900/50 rounded-2xl border border-zinc-800 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-zinc-900 border-b border-zinc-800 text-zinc-400 text-sm uppercase tracking-wider">
+                  <th className="p-4 font-semibold">Movie</th>
+                  <th className="p-4 font-semibold">Year</th>
+                  <th className="p-4 font-semibold">Rating</th>
+                  <th className="p-4 font-semibold text-center">Slider / Hero</th>
+                  <th className="p-4 font-semibold text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-800">
+                {moviesList.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="p-8 text-center text-zinc-500">
+                      No movies found in database. Add one above!
+                    </td>
+                  </tr>
+                ) : moviesList.map((movie: any, index: number) => (
+                  <tr key={movie.id} className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="p-4 flex items-center gap-4">
+                      <div className="w-12 h-16 bg-zinc-800 rounded overflow-hidden flex-shrink-0">
+                        {movie.poster_url && <img src={movie.poster_url} alt={movie.title} className="w-full h-full object-cover" />}
+                      </div>
+                      <div>
+                        <p className="font-bold text-white">{movie.title}</p>
+                        <p className="text-xs text-zinc-500 line-clamp-1 max-w-xs">
+                          {movie.categories ? movie.categories.join(", ") : ""}
+                        </p>
+                      </div>
+                    </td>
+                    <td className="p-4 text-zinc-300">{movie.release_year}</td>
+                    <td className="p-4 text-zinc-300">
+                      <span className="flex items-center gap-1"><FiStar className="text-yellow-500 text-xs" /> {movie.tmdb_rating}</span>
+                    </td>
+                    <td className="p-4 text-center">
+                      {movie.is_hero ? (
+                        <span className="inline-flex items-center justify-center px-2 py-1 rounded bg-primary/20 text-primary text-xs font-bold border border-primary/30">
+                          YES
+                        </span>
+                      ) : (
+                        <span className="text-zinc-600">-</span>
+                      )}
+                    </td>
+                    <td className="p-4 text-right">
+                      <button 
+                        onClick={() => handleEditClick(movie)} 
+                        className="text-sm text-zinc-400 hover:text-white transition-colors underline"
+                      >
+                        Edit
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </main>
     </div>
   );

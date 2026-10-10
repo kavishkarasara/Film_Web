@@ -4,7 +4,7 @@ import Link from "next/link";
 import { FiChevronDown, FiPlay, FiStar, FiThumbsUp, FiThumbsDown, FiDownload, FiShare2 } from "react-icons/fi";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { getMovieById } from "@/lib/data";
+import { supabase } from "@/lib/supabase";
 import Navbar from "@/components/Navbar";
 
 export default function MovieDetail() {
@@ -23,8 +23,13 @@ export default function MovieDetail() {
 
   useEffect(() => {
     if (params.id) {
-      const found = getMovieById(params.id as string);
-      setMovie(found);
+      const fetchMovie = async () => {
+        const { data } = await supabase.from('movies').select('*').eq('id', params.id).single();
+        if (data) {
+          setMovie(data);
+        }
+      };
+      fetchMovie();
     }
   }, [params.id]);
 
@@ -47,7 +52,7 @@ export default function MovieDetail() {
       {/* Background Backdrop */}
       <div className="absolute top-0 left-0 right-0 h-[80vh] overflow-hidden -z-10 pointer-events-none">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={movie.img} alt="Backdrop" className="w-full h-full object-cover opacity-20 blur-3xl scale-110" />
+        <img src={movie.poster_url} alt="Backdrop" className="w-full h-full object-cover opacity-20 blur-3xl scale-110" />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0f0f11]/80 to-[#0f0f11]"></div>
       </div>
 
@@ -63,7 +68,7 @@ export default function MovieDetail() {
           <div className="w-full md:w-1/3 flex-shrink-0">
              {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
-              src={movie.img} 
+              src={movie.poster_url} 
               alt={movie.title} 
               className="w-full aspect-[2/3] object-cover rounded-xl shadow-2xl ring-1 ring-white/10"
             />
@@ -79,18 +84,16 @@ export default function MovieDetail() {
             </div>
             
             <div className="flex flex-col sm:flex-row flex-wrap gap-4 mb-6">
-              <button className="flex-1 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg font-bold text-sm transition-transform hover:-translate-y-1 active:translate-y-0 flex flex-col items-center justify-center gap-1 shadow-[0_0_20px_rgba(225,29,72,0.3)]">
-                <div className="flex items-center gap-2 text-base"><FiDownload className="text-lg" /> 720p WEB-DL</div>
-                <span className="text-xs text-white/70 font-normal">File Size: 850 MB</span>
-              </button>
-              <button className="flex-1 bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-white px-6 py-3 rounded-lg font-bold text-sm transition-transform hover:-translate-y-1 active:translate-y-0 flex flex-col items-center justify-center gap-1">
-                <div className="flex items-center gap-2 text-base"><FiDownload className="text-lg" /> 1080p WEB-DL</div>
-                <span className="text-xs text-zinc-400 font-normal">File Size: 1.8 GB</span>
-              </button>
-              <button className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white px-6 py-3 rounded-lg font-bold text-sm transition-transform hover:-translate-y-1 active:translate-y-0 flex flex-col items-center justify-center gap-1 shadow-[0_0_20px_rgba(245,158,11,0.3)]">
-                <div className="flex items-center gap-2 text-base"><FiDownload className="text-lg" /> 4K UHD</div>
-                <span className="text-xs text-white/80 font-normal">File Size: 4.5 GB</span>
-              </button>
+              {movie.download_links && movie.download_links.length > 0 ? (
+                movie.download_links.map((link: any, index: number) => (
+                  <a href={`/download?url=${encodeURIComponent(link.url)}`} key={index} className="flex-1 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg font-bold text-sm transition-transform hover:-translate-y-1 active:translate-y-0 flex flex-col items-center justify-center gap-1 shadow-[0_0_20px_rgba(163,230,53,0.3)]">
+                    <div className="flex items-center gap-2 text-base"><FiDownload className="text-lg" /> {link.label}</div>
+                    <span className="text-xs text-white/70 font-normal">Provider: {link.provider}</span>
+                  </a>
+                ))
+              ) : (
+                <div className="text-zinc-500 italic py-4">No download links available yet.</div>
+              )}
             </div>
 
             {/* Ad Banner - High CTR location */}
@@ -106,16 +109,15 @@ export default function MovieDetail() {
             </div>
             
             <div className="flex flex-wrap items-center gap-4 text-sm font-medium mb-8">
-              {movie.tags?.map((tag: string, index: number) => (
+              {movie.categories?.map((tag: string, index: number) => (
                 <span key={tag} className={index === 0 ? "px-3 py-1 bg-white text-black rounded-sm font-bold" : "px-3 py-1 border border-white/20 rounded-sm"}>{tag}</span>
               ))}
-              <span className="text-zinc-400">{movie.year}</span>
-              <span className="text-zinc-400">{movie.duration}</span>
-              <span className="flex items-center gap-1 text-yellow-500"><FiStar className="fill-current"/> {movie.rating}</span>
+              <span className="text-zinc-400">{movie.release_year}</span>
+              <span className="flex items-center gap-1 text-yellow-500"><FiStar className="fill-current"/> {movie.tmdb_rating}</span>
             </div>
             
-            <p className="text-zinc-300 mb-10 leading-relaxed max-w-3xl text-sm">
-              {movie.desc}
+            <p className="text-zinc-300 mb-10 leading-relaxed max-w-3xl text-sm whitespace-pre-line">
+              {movie.description}
             </p>
             
             <div className="space-y-3 text-sm">
@@ -125,11 +127,11 @@ export default function MovieDetail() {
               </div>
               <div className="grid grid-cols-[120px_1fr] gap-4">
                 <span className="text-zinc-500 text-right">Genre :</span>
-                <span className="font-medium">{movie.tags?.join(", ")}</span>
+                <span className="font-medium">{movie.categories?.join(", ")}</span>
               </div>
               <div className="grid grid-cols-[120px_1fr] gap-4">
                 <span className="text-zinc-500 text-right">Release Date :</span>
-                <span className="font-medium">{movie.year}</span>
+                <span className="font-medium">{movie.release_year}</span>
               </div>
               <div className="grid grid-cols-[120px_1fr] gap-4">
                 <span className="text-zinc-500 text-right">Production :</span>

@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { FiSearch, FiBell, FiDownload, FiStar, FiChevronRight, FiChevronLeft } from "react-icons/fi";
-
-import { MOVIES_LIST, TOP_RATED_MOVIES, NEW_AND_POPULAR, HERO_SLIDES } from "@/lib/data";
+import { supabase } from "@/lib/supabase";
 import Navbar from "@/components/Navbar";
 
 function MovieRow({ id, title, desc, movies }: { id: string, title: string, desc: string, movies: any[] }) {
@@ -25,15 +24,15 @@ function MovieRow({ id, title, desc, movies }: { id: string, title: string, desc
         {movies.map((movie) => (
           <Link href={`/movie/${movie.id}`} key={movie.id} className="min-w-[200px] md:min-w-[240px] snap-start group relative rounded-2xl overflow-hidden bg-zinc-900 aspect-[2/3] cursor-pointer ring-1 ring-white/10 hover:ring-primary/50 transition-all duration-300 hover:-translate-y-2 shadow-xl flex-shrink-0 block">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={movie.img} alt={movie.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100" />
+            <img src={movie.poster_url} alt={movie.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100" />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
             
             <div className="absolute inset-0 p-5 flex flex-col justify-end">
               <div className="translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                 <h3 className="text-lg font-bold text-white mb-1 truncate">{movie.title}</h3>
                 <div className="flex items-center gap-3 text-xs font-medium">
-                  <span className="flex items-center gap-1 text-yellow-500"><FiStar className="fill-current"/> {movie.rating}</span>
-                  <span className="text-zinc-400">{movie.year}</span>
+                  <span className="flex items-center gap-1 text-yellow-500"><FiStar className="fill-current"/> {movie.tmdb_rating}</span>
+                  <span className="text-zinc-400">{movie.release_year}</span>
                 </div>
               </div>
             </div>
@@ -50,6 +49,10 @@ function MovieRow({ id, title, desc, movies }: { id: string, title: string, desc
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [heroMovies, setHeroMovies] = useState<any[]>([]);
+  const [moviesList, setMoviesList] = useState<any[]>([]);
+  const [topRated, setTopRated] = useState<any[]>([]);
+  const [newPopular, setNewPopular] = useState<any[]>([]);
 
   const AdBanner = ({ className = "" }: { className?: string }) => (
     <div className={`w-full bg-zinc-900/50 border border-zinc-800 rounded-lg flex items-center justify-center relative overflow-hidden group ${className}`}>
@@ -61,16 +64,32 @@ export default function Home() {
     </div>
   );
 
-
-
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
-    }, 5000);
-    return () => clearInterval(timer);
+    const fetchHomeData = async () => {
+      const { data } = await supabase.from('movies').select('*').order('created_at', { ascending: false });
+      if (data) {
+        setMoviesList(data);
+        setHeroMovies(data.filter((m: any) => m.is_hero));
+        
+        const top = [...data].sort((a: any, b: any) => b.tmdb_rating - a.tmdb_rating).slice(0, 10);
+        setTopRated(top);
+        
+        const newPop = [...data].sort((a: any, b: any) => parseInt(b.release_year || '0') - parseInt(a.release_year || '0')).slice(0, 10);
+        setNewPopular(newPop);
+      }
+    };
+    fetchHomeData();
   }, []);
 
-  const hero = HERO_SLIDES[currentSlide];
+  useEffect(() => {
+    if (heroMovies.length === 0) return;
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroMovies.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [heroMovies.length]);
+
+  const hero = heroMovies[currentSlide];
 
   return (
     <div className="min-h-screen bg-[#0f0f11] text-white font-sans selection:bg-primary/30">
@@ -78,7 +97,11 @@ export default function Home() {
 
       {/* Hero Section Carousel */}
       <section className="relative w-full min-h-[90vh] md:min-h-screen flex items-center px-10 md:px-20 lg:px-32 mt-0 overflow-hidden">
-        {HERO_SLIDES.map((slide, index) => (
+        {heroMovies.length === 0 ? (
+           <div className="absolute inset-0 flex items-center justify-center text-zinc-500">
+             No Hero Movies configured yet. Add them in the Admin Panel!
+           </div>
+        ) : heroMovies.map((slide, index) => (
           <div 
             key={slide.id} 
             className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
@@ -86,7 +109,7 @@ export default function Home() {
             <div className="absolute inset-0 z-0">
                {/* eslint-disable-next-line @next/next/no-img-element */}
               <img 
-                src={slide.img} 
+                src={slide.poster_url} 
                 alt={slide.title} 
                 className={`w-full h-full object-cover opacity-60 transition-transform duration-[10s] ease-out ${index === currentSlide ? 'scale-105' : 'scale-100'}`}
               />
@@ -96,11 +119,11 @@ export default function Home() {
             
             <div className="relative z-10 max-w-2xl h-full flex flex-col justify-center px-10 md:px-20 lg:px-32 absolute inset-0 pt-20 pb-16">
               <div className="flex items-center gap-3 mb-4 animate-fade-in-up">
-                {slide.tags.map(tag => (
+                {slide.categories && slide.categories.slice(0,3).map((tag: string) => (
                   <span key={tag} className="px-3 py-1 text-xs font-bold uppercase tracking-wider bg-primary/20 text-primary rounded-full border border-primary/30">{tag}</span>
                 ))}
-                <span className="flex items-center gap-1 text-xs font-bold text-yellow-500"><FiStar className="fill-current"/> {slide.rating}</span>
-                <span className="text-xs font-semibold text-zinc-400">{slide.info}</span>
+                <span className="flex items-center gap-1 text-xs font-bold text-yellow-500"><FiStar className="fill-current"/> {slide.tmdb_rating}</span>
+                <span className="text-xs font-semibold text-zinc-400">{slide.release_year}</span>
               </div>
               
               <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-[1.1] animate-fade-in-up" style={{ animationDelay: '100ms' }}>
@@ -108,8 +131,8 @@ export default function Home() {
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-500">{slide.title.split(' ').slice(2).join(' ')}</span>
               </h1>
               
-              <p className="text-lg text-zinc-300 mb-8 max-w-xl leading-relaxed animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-                {slide.desc}
+              <p className="text-lg text-zinc-300 mb-8 max-w-xl leading-relaxed animate-fade-in-up line-clamp-3" style={{ animationDelay: '200ms' }}>
+                {slide.description}
               </p>
               
               <div className="flex items-center gap-4 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
@@ -124,7 +147,7 @@ export default function Home() {
         
         {/* Carousel Indicators */}
         <div className="absolute bottom-12 left-10 md:left-20 lg:left-32 z-20 flex gap-2">
-          {HERO_SLIDES.map((_, idx) => (
+          {heroMovies.map((_, idx) => (
             <button 
               key={idx} 
               onClick={() => setCurrentSlide(idx)}
@@ -136,15 +159,15 @@ export default function Home() {
 
       {/* Categories matching the navbar */}
       <div className="relative z-20 pb-10">
-        <MovieRow id="movies" title="Movies" desc="Explore top downloaded and critically acclaimed films." movies={MOVIES_LIST} />
+        <MovieRow id="movies" title="Movies" desc="Explore top downloaded and critically acclaimed films." movies={moviesList} />
         
         {/* Ad Banner Homepage */}
         <div className="px-10 md:px-20 lg:px-32 my-6">
           <AdBanner className="h-28 max-w-5xl mx-auto" />
         </div>
 
-        <MovieRow id="top-rated" title="Top Rated Movies" desc="The highest rated films of all time." movies={TOP_RATED_MOVIES} />
-        <MovieRow id="new-popular" title="New & Popular" desc="The latest and most trending releases right now." movies={NEW_AND_POPULAR} />
+        <MovieRow id="top-rated" title="Top Rated Movies" desc="The highest rated films of all time." movies={topRated} />
+        <MovieRow id="new-popular" title="New & Popular" desc="The latest and most trending releases right now." movies={newPopular} />
       </div>
       
       {/* Footer */}
