@@ -36,6 +36,7 @@ export default function AdminPanel() {
     link720p: "",
     link1080p: "",
     link4k: "",
+    linkDirect: "",
     isHero: false,
   });
 
@@ -65,6 +66,7 @@ export default function AdminPanel() {
     if (formData.link720p) download_links.push({ quality: '720p', provider: 'other', url: formData.link720p, label: '720p' });
     if (formData.link1080p) download_links.push({ quality: '1080p', provider: 'other', url: formData.link1080p, label: '1080p' });
     if (formData.link4k) download_links.push({ quality: '4K', provider: 'other', url: formData.link4k, label: '4K' });
+    if (formData.linkDirect) download_links.push({ quality: 'Direct', provider: 'other', url: formData.linkDirect, label: 'Direct Download' });
 
     const moviePayload = {
       title: formData.title,
@@ -109,6 +111,7 @@ export default function AdminPanel() {
       link720p: "",
       link1080p: "",
       link4k: "",
+      linkDirect: "",
       isHero: false,
     });
     setEditingMovieId(null);
@@ -119,12 +122,13 @@ export default function AdminPanel() {
     setEditingMovieId(movie.id);
     
     // Parse links back into form
-    let link720p = "", link1080p = "", link4k = "";
+    let link720p = "", link1080p = "", link4k = "", linkDirect = "";
     if (movie.download_links && Array.isArray(movie.download_links)) {
       movie.download_links.forEach((link: any) => {
         if (link.quality === '720p') link720p = link.url;
         if (link.quality === '1080p') link1080p = link.url;
         if (link.quality === '4K') link4k = link.url;
+        if (link.quality === 'Direct') linkDirect = link.url;
       });
     }
 
@@ -139,6 +143,7 @@ export default function AdminPanel() {
       link720p,
       link1080p,
       link4k,
+      linkDirect,
       isHero: movie.is_hero || false, 
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -294,17 +299,23 @@ export default function AdminPanel() {
               <FiLink /> Download Links
             </h3>
 
-            <div>
-              <label className="block text-sm font-medium text-zinc-400 mb-2">720p Download URL</label>
-              <input type="url" required value={formData.link720p} onChange={e => setFormData({ ...formData, link720p: e.target.value })} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="Mega / Google Drive link..." />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-zinc-400 mb-2">1080p Download URL</label>
-              <input type="url" required value={formData.link1080p} onChange={e => setFormData({ ...formData, link1080p: e.target.value })} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="Mega / Google Drive link..." />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-zinc-400 mb-2">4K UHD Download URL</label>
-              <input type="url" required value={formData.link4k} onChange={e => setFormData({ ...formData, link4k: e.target.value })} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="Mega / Google Drive link..." />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-2">720p Download URL (Optional)</label>
+                <input type="url" value={formData.link720p} onChange={e => setFormData({ ...formData, link720p: e.target.value })} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="Mega / Google Drive link..." />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-2">1080p Download URL (Optional)</label>
+                <input type="url" value={formData.link1080p} onChange={e => setFormData({ ...formData, link1080p: e.target.value })} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="Mega / Google Drive link..." />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-2">4K UHD Download URL (Optional)</label>
+                <input type="url" value={formData.link4k} onChange={e => setFormData({ ...formData, link4k: e.target.value })} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="Mega / Google Drive link..." />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-2">Direct Download URL (Optional)</label>
+                <input type="url" value={formData.linkDirect} onChange={e => setFormData({ ...formData, linkDirect: e.target.value })} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="Direct link..." />
+              </div>
             </div>
           </div>
 
@@ -314,7 +325,7 @@ export default function AdminPanel() {
                 type="button" 
                 onClick={() => {
                   setEditingMovieId(null);
-                  setFormData({ title: "", desc: "", img: "", backdrop: "", rating: "", year: "", tags: "", link720p: "", link1080p: "", link4k: "", isHero: false });
+                  setFormData({ title: "", desc: "", img: "", backdrop: "", rating: "", year: "", tags: "", link720p: "", link1080p: "", link4k: "", linkDirect: "", isHero: false });
                 }}
                 className="bg-zinc-800 hover:bg-zinc-700 text-white px-8 py-3 rounded-lg font-bold transition-colors"
               >
