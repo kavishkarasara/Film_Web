@@ -12,6 +12,9 @@ export default function MovieDetail() {
   const [activeSeason, setActiveSeason] = useState("Season 1");
   const [movie, setMovie] = useState<any>(null);
   const [relatedMovies, setRelatedMovies] = useState<any[]>([]);
+  const [comments, setComments] = useState<any[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [userName, setUserName] = useState(() => "Guest" + Math.floor(Math.random() * 1000));
   const [scrolled, setScrolled] = useState(false);
   const [shareText, setShareText] = useState("Share");
 
@@ -39,7 +42,13 @@ export default function MovieDetail() {
         const { data } = await supabase.from('movies').select('*').eq('id', params.id).single();
         if (data) {
           setMovie(data);
+          
+          // Fetch Comments
+          const { data: commentsData } = await supabase.from('comments').select('*').eq('movie_id', data.id).order('created_at', { ascending: false });
+          if (commentsData) setComments(commentsData);
+
           // Fetch related movies based on the first category
+          let fetchedRelated = false;
           if (data.categories && data.categories.length > 0) {
             const { data: relatedData } = await supabase
               .from('movies')
@@ -48,9 +57,15 @@ export default function MovieDetail() {
               .contains('categories', [data.categories[0]])
               .limit(5);
             
-            if (relatedData) {
+            if (relatedData && relatedData.length > 0) {
               setRelatedMovies(relatedData);
+              fetchedRelated = true;
             }
+          }
+          
+          if (!fetchedRelated) {
+             const { data: fallbackData } = await supabase.from('movies').select('*').neq('id', data.id).order('created_at', { ascending: false }).limit(5);
+             if (fallbackData) setRelatedMovies(fallbackData);
           }
         }
       };
@@ -61,6 +76,21 @@ export default function MovieDetail() {
   if (!movie) {
     return <div className="min-h-screen bg-[#0f0f11] flex items-center justify-center text-white">Loading...</div>;
   }
+
+  const handleCommentSubmit = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && newComment.trim() !== '') {
+      const { error } = await supabase.from('comments').insert([{
+        movie_id: movie.id,
+        user_name: userName,
+        content: newComment.trim()
+      }]);
+      if (!error) {
+        setNewComment("");
+        const { data: commentsData } = await supabase.from('comments').select('*').eq('movie_id', movie.id).order('created_at', { ascending: false });
+        if (commentsData) setComments(commentsData);
+      }
+    }
+  };
 
   const AdBanner = ({ className = "" }: { className?: string }) => (
     <div className={`w-full bg-zinc-900/50 border border-zinc-800 rounded-lg flex items-center justify-center relative overflow-hidden group ${className}`}>
@@ -211,34 +241,38 @@ export default function MovieDetail() {
           <div className="flex gap-4 mb-10">
             <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-zinc-800">
                {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=James" alt="User" className="w-full h-full object-cover" />
+              <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userName}`} alt="User" className="w-full h-full object-cover" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-semibold mb-2">James</p>
-              <input type="text" placeholder="Write your comments here..." className="w-full bg-white text-black px-4 py-3 rounded-md outline-none focus:ring-2 focus:ring-primary/50" />
+              <p className="text-sm font-semibold mb-2">{userName}</p>
+              <input 
+                type="text" 
+                placeholder="Write your comments here... (Press Enter to post)" 
+                className="w-full bg-white text-black px-4 py-3 rounded-md outline-none focus:ring-2 focus:ring-primary/50" 
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                onKeyDown={handleCommentSubmit}
+              />
             </div>
           </div>
           
           {/* Comment List */}
           <div className="space-y-8">
-            {[
-              { name: "Arlene", time: "11/08/2023", seed: "Arlene1", text: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo con." },
-              { name: "Alfonso", time: "12/08/2023", seed: "Alfonso", text: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo con." },
-              { name: "Arlene", time: "13/08/2023", seed: "Arlene2", text: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo con." }
-            ].map((comment, idx) => (
-              <div key={idx} className="flex gap-4">
+            {comments.length === 0 ? (
+              <p className="text-zinc-500 italic">No comments yet. Be the first to comment!</p>
+            ) : comments.map((comment) => (
+              <div key={comment.id} className="flex gap-4">
                 <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-zinc-800">
                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.seed}`} alt={comment.name} className="w-full h-full object-cover" />
+                  <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.user_name}`} alt={comment.user_name} className="w-full h-full object-cover" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold mb-1">{comment.name}</p>
-                  <p className="text-xs text-zinc-500 mb-2">{comment.time}</p>
-                  <p className="text-sm text-zinc-300 mb-3">{comment.text}</p>
+                  <p className="text-sm font-semibold mb-1">{comment.user_name}</p>
+                  <p className="text-xs text-zinc-500 mb-2">{new Date(comment.created_at).toLocaleDateString()}</p>
+                  <p className="text-sm text-zinc-300 mb-3">{comment.content}</p>
                   <div className="flex items-center gap-4 text-xs text-zinc-400">
                     <button className="flex items-center gap-1 hover:text-white transition-colors"><FiThumbsUp /> 0</button>
                     <button className="flex items-center gap-1 hover:text-white transition-colors"><FiThumbsDown /></button>
-                    <button className="hover:text-white transition-colors font-medium">Reply</button>
                   </div>
                 </div>
               </div>
