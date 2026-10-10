@@ -125,7 +125,7 @@ export default function AdminPanel() {
     }
     
     try {
-      const response = await fetch(`https://yts.mx/api/v2/list_movies.json?query_term=${encodeURIComponent(formData.title)}`);
+      const response = await fetch(`/api/movie-info?title=${encodeURIComponent(formData.title)}`);
       const data = await response.json();
       
       if (data.data && data.data.movies && data.data.movies.length > 0) {
