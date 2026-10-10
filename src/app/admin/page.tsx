@@ -24,7 +24,7 @@ export default function AdminPanel() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === "admin123") {
+    if (password === "Ka(20010514)ka") {
       setIsAuthenticated(true);
       setError("");
     } else {
@@ -36,10 +36,10 @@ export default function AdminPanel() {
     e.preventDefault();
     // Here normally we would send a POST request to an API route to update data.ts or a DB
     console.log("Movie Data Submitted:", formData);
-    
+
     setSuccessMsg("Movie successfully added to the platform!");
     setTimeout(() => setSuccessMsg(""), 3000);
-    
+
     setFormData({
       title: "",
       desc: "",
@@ -62,12 +62,12 @@ export default function AdminPanel() {
             <h1 className="text-3xl font-black tracking-tighter text-primary mb-2">CINE<span className="text-white">VAULT</span></h1>
             <p className="text-zinc-400 font-medium text-sm tracking-widest uppercase">Admin Portal</p>
           </div>
-          
+
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-zinc-400 mb-2">Admin Password</label>
-              <input 
-                type="password" 
+              <input
+                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full bg-zinc-950 border border-zinc-700 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-primary/50 transition-all"
@@ -81,7 +81,7 @@ export default function AdminPanel() {
             </button>
           </form>
           <div className="mt-6 text-center">
-             <Link href="/" className="text-xs text-zinc-500 hover:text-white transition-colors">Return to Website</Link>
+            <Link href="/" className="text-xs text-zinc-500 hover:text-white transition-colors">Return to Website</Link>
           </div>
         </div>
       </div>
@@ -96,7 +96,7 @@ export default function AdminPanel() {
           <Link href="/" className="text-xl font-black tracking-tighter text-primary">CINE<span className="text-white">VAULT</span></Link>
           <span className="px-2 py-1 bg-zinc-800 text-xs font-bold uppercase tracking-wider rounded text-zinc-400">Admin</span>
         </div>
-        <button 
+        <button
           onClick={() => setIsAuthenticated(false)}
           className="flex items-center gap-2 text-sm font-medium text-zinc-400 hover:text-white transition-colors"
         >
@@ -119,37 +119,37 @@ export default function AdminPanel() {
         )}
 
         <form onSubmit={handleAddMovie} className="space-y-8 bg-zinc-900/50 p-8 rounded-2xl border border-zinc-800">
-          
+
           {/* General Info */}
           <div className="space-y-6">
             <h3 className="text-lg font-semibold flex items-center gap-2 text-primary border-b border-zinc-800 pb-2">
               <FiFilm /> Movie Information
             </h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="col-span-1 md:col-span-2">
                 <label className="block text-sm font-medium text-zinc-400 mb-2">Movie Title</label>
-                <input type="text" required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="e.g. Inception" />
+                <input type="text" required value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="e.g. Inception" />
               </div>
-              
+
               <div className="col-span-1 md:col-span-2">
                 <label className="block text-sm font-medium text-zinc-400 mb-2">Description / Synopsis</label>
-                <textarea required rows={4} value={formData.desc} onChange={e => setFormData({...formData, desc: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="Brief summary of the movie..." />
+                <textarea required rows={4} value={formData.desc} onChange={e => setFormData({ ...formData, desc: e.target.value })} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="Brief summary of the movie..." />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-2">Release Year</label>
-                <input type="text" required value={formData.year} onChange={e => setFormData({...formData, year: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="e.g. 2024" />
+                <input type="text" required value={formData.year} onChange={e => setFormData({ ...formData, year: e.target.value })} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="e.g. 2024" />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-2">IMDb Rating</label>
-                <input type="text" required value={formData.rating} onChange={e => setFormData({...formData, rating: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="e.g. 8.5" />
+                <input type="text" required value={formData.rating} onChange={e => setFormData({ ...formData, rating: e.target.value })} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="e.g. 8.5" />
               </div>
 
               <div className="col-span-1 md:col-span-2">
                 <label className="block text-sm font-medium text-zinc-400 mb-2">Genres / Tags (comma separated)</label>
-                <input type="text" required value={formData.tags} onChange={e => setFormData({...formData, tags: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="Action, Sci-Fi, Thriller" />
+                <input type="text" required value={formData.tags} onChange={e => setFormData({ ...formData, tags: e.target.value })} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="Action, Sci-Fi, Thriller" />
               </div>
             </div>
           </div>
@@ -159,10 +159,10 @@ export default function AdminPanel() {
             <h3 className="text-lg font-semibold flex items-center gap-2 text-primary border-b border-zinc-800 pb-2">
               <FiImage /> Media Assets
             </h3>
-            
+
             <div className="col-span-1 md:col-span-2">
               <label className="block text-sm font-medium text-zinc-400 mb-2">Poster Image URL</label>
-              <input type="url" required value={formData.img} onChange={e => setFormData({...formData, img: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="https://..." />
+              <input type="url" required value={formData.img} onChange={e => setFormData({ ...formData, img: e.target.value })} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="https://..." />
             </div>
           </div>
 
@@ -171,18 +171,18 @@ export default function AdminPanel() {
             <h3 className="text-lg font-semibold flex items-center gap-2 text-primary border-b border-zinc-800 pb-2">
               <FiLink /> Download Links
             </h3>
-            
+
             <div>
               <label className="block text-sm font-medium text-zinc-400 mb-2">720p Download URL</label>
-              <input type="url" required value={formData.link720p} onChange={e => setFormData({...formData, link720p: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="Mega / Google Drive link..." />
+              <input type="url" required value={formData.link720p} onChange={e => setFormData({ ...formData, link720p: e.target.value })} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="Mega / Google Drive link..." />
             </div>
             <div>
               <label className="block text-sm font-medium text-zinc-400 mb-2">1080p Download URL</label>
-              <input type="url" required value={formData.link1080p} onChange={e => setFormData({...formData, link1080p: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="Mega / Google Drive link..." />
+              <input type="url" required value={formData.link1080p} onChange={e => setFormData({ ...formData, link1080p: e.target.value })} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="Mega / Google Drive link..." />
             </div>
             <div>
               <label className="block text-sm font-medium text-zinc-400 mb-2">4K UHD Download URL</label>
-              <input type="url" required value={formData.link4k} onChange={e => setFormData({...formData, link4k: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="Mega / Google Drive link..." />
+              <input type="url" required value={formData.link4k} onChange={e => setFormData({ ...formData, link4k: e.target.value })} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="Mega / Google Drive link..." />
             </div>
           </div>
 
@@ -191,7 +191,7 @@ export default function AdminPanel() {
               <FiSave /> Publish Movie
             </button>
           </div>
-          
+
         </form>
       </main>
     </div>
