@@ -7,8 +7,8 @@ import { usePathname } from "next/navigation";
 export default function GlobalAds() {
   const pathname = usePathname();
 
-  // ONLY show ads on the download page
-  const shouldShowAds = pathname?.startsWith('/download');
+  // ONLY show ads on the download and gate pages
+  const shouldShowAds = pathname?.startsWith('/download') || pathname?.startsWith('/gate');
 
   useEffect(() => {
     // Only register service worker if ads are allowed on this page

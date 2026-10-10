@@ -143,7 +143,7 @@ export default function MovieDetail() {
             <div className="flex flex-col sm:flex-row flex-wrap gap-4 mb-6">
               {movie.download_links && movie.download_links.length > 0 ? (
                 movie.download_links.map((link: any, index: number) => (
-                  <a href={`/download?url=${encodeURIComponent(link.url)}`} key={index} className="flex-1 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg font-bold text-sm transition-transform hover:-translate-y-1 active:translate-y-0 flex flex-col items-center justify-center gap-1 shadow-[0_0_20px_rgba(163,230,53,0.3)]">
+                  <a target="_blank" rel="noopener noreferrer" href={`/gate?url=${encodeURIComponent(link.url)}`} key={index} className="flex-1 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg font-bold text-sm transition-transform hover:-translate-y-1 active:translate-y-0 flex flex-col items-center justify-center gap-1 shadow-[0_0_20px_rgba(163,230,53,0.3)]">
                     <div className="flex items-center gap-2 text-base"><FiDownload className="text-lg" /> {link.label}</div>
                     <span className="text-xs text-white/70 font-normal">Provider: {link.provider}</span>
                   </a>
@@ -152,9 +152,6 @@ export default function MovieDetail() {
                 <div className="text-zinc-500 italic py-4">No download links available yet.</div>
               )}
             </div>
-
-            {/* Ad Banner - High CTR location */}
-            <AdBanner className="h-24 mb-8" />
 
 
             
@@ -199,8 +196,6 @@ export default function MovieDetail() {
 
 
 
-        {/* Ad Banner - Large Leaderboard */}
-        <AdBanner className="h-32 mb-20 max-w-4xl mx-auto" />
 
         {/* You may also like Section */}
         {relatedMovies.length > 0 && (

@@ -3,7 +3,6 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { FiDownloadCloud, FiAlertCircle } from "react-icons/fi";
-import Navbar from "@/components/Navbar";
 import AdBanner from "@/components/AdBanner";
 import AdNative from "@/components/AdNative";
 
@@ -62,9 +61,13 @@ function DownloadContent() {
       </div>
 
       {/* --- SCROLL TRAP: Ad Section 1 --- */}
-      <div className="space-y-8 mb-20">
+      <div className="space-y-6 mb-16 w-full flex flex-col items-center">
         {/* Top Ad Space */}
-        <AdBanner id="e2c3ccf3cbe4f40e454a92dcb87306db" width={300} height={250} />
+        <AdBanner id="40ed9156f9888c91a58a529315843381" width={728} height={90} />
+        <div className="flex flex-col md:flex-row gap-6">
+          <AdBanner id="e2c3ccf3cbe4f40e454a92dcb87306db" width={300} height={250} />
+          <AdBanner id="e2c3ccf3cbe4f40e454a92dcb87306db" width={300} height={250} />
+        </div>
 
         {/* Direct Link Ads Container */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -158,9 +161,8 @@ function DownloadContent() {
 
 export default function DownloadPage() {
   return (
-    <div className="min-h-screen bg-[#0f0f11] text-white font-sans selection:bg-primary/30">
-      <Navbar />
-      <Suspense fallback={<div className="flex justify-center py-32">Loading...</div>}>
+    <div className="min-h-screen bg-[#070709] text-white font-sans selection:bg-primary/30">
+      <Suspense fallback={<div className="flex justify-center py-32 text-zinc-500">Loading...</div>}>
         <DownloadContent />
       </Suspense>
     </div>
