@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -10,7 +11,13 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Title is required' }, { status: 400 });
   }
 
+  if (!process.env.GEMINI_API_KEY) {
+    return NextResponse.json({ error: 'GEMINI_API_KEY is missing' }, { status: 500 });
+  }
+
   try {
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
     const prompt = `Provide the following details for the movie "${title}" in strict JSON format: 
     {
       "title": "Exact Movie Title",
@@ -21,23 +28,13 @@ export async function GET(request: Request) {
     }
     Return ONLY valid JSON. Do not include markdown formatting like \`\`\`json.`;
     
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-      }),
-    });
-
-    const data = await response.json();
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
     
-    if (data.candidates && data.candidates.length > 0) {
-      let jsonText = data.candidates[0].content.parts[0].text;
-      // Clean up markdown if Gemini includes it
-      jsonText = jsonText.replace(/```json/g, '').replace(/```/g, '').trim();
-      
+    // Clean up markdown if Gemini includes it
+    let jsonText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    
+    try {
       const movieInfo = JSON.parse(jsonText);
       
       // Return in the exact format the frontend expects
@@ -52,12 +49,13 @@ export async function GET(request: Request) {
           }]
         }
       });
+    } catch (parseError) {
+      console.error("Failed to parse Gemini response as JSON:", jsonText);
+      return NextResponse.json({ error: 'Failed to parse AI response' }, { status: 500 });
     }
 
-    console.error("Gemini Response:", data);
-    return NextResponse.json({ error: 'Failed to generate content' }, { status: 500 });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Gemini Error:", error);
-    return NextResponse.json({ error: 'Failed to fetch from Gemini API' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Failed to fetch from Gemini API' }, { status: 500 });
   }
 }

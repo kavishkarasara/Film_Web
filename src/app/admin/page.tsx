@@ -128,7 +128,7 @@ export default function AdminPanel() {
       const response = await fetch(`/api/movie-info?title=${encodeURIComponent(formData.title)}`);
       const data = await response.json();
       
-      if (data.data && data.data.movies && data.data.movies.length > 0) {
+      if (response.ok && data.data && data.data.movies && data.data.movies.length > 0) {
         const movie = data.data.movies[0]; // get the first result
         setFormData(prev => ({
           ...prev,
@@ -143,11 +143,11 @@ export default function AdminPanel() {
         setSuccessMsg(`Auto-filled details for: ${movie.title} ✅`);
         setTimeout(() => setSuccessMsg(""), 3000);
       } else {
-        alert("Movie not found in the database. Please fill manually.");
+        alert(data.error || "Movie not found or API Key is invalid. Please check Vercel settings.");
       }
     } catch (err) {
       console.error(err);
-      alert("Failed to fetch movie details. Please try manually.");
+      alert("Failed to fetch movie details. Check if the API key is valid.");
     }
   };
 
