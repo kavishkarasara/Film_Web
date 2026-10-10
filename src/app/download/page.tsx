@@ -62,10 +62,22 @@ function DownloadContent() {
 
       {/* --- SCROLL TRAP: Ad Section 1 --- */}
       <div className="space-y-6 mb-16 w-full flex flex-col items-center">
-        {/* Top Ad Space */}
+        {/* Adsterra 728x90 */}
         <AdBanner id="40ed9156f9888c91a58a529315843381" width={728} height={90} />
-        <div className="flex flex-col md:flex-row gap-6">
+        
+        <div className="flex flex-col md:flex-row gap-6 w-full max-w-4xl justify-center items-center">
           <AdBanner id="e2c3ccf3cbe4f40e454a92dcb87306db" width={300} height={250} />
+          
+          <a 
+            href="https://directyp.org/4/f0162f5d4136842794d17a1f3da5efa7" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="flex-1 min-w-[280px] h-[250px] bg-indigo-600 hover:bg-indigo-500 border-2 border-indigo-400 rounded-lg flex flex-col items-center justify-center p-6 transition-all shadow-[0_0_20px_rgba(79,70,229,0.4)] animate-pulse hover:animate-none cursor-pointer text-white"
+          >
+             <span className="font-extrabold text-2xl mb-2 text-center">🎥 WATCH IN HD</span>
+             <span className="text-sm text-indigo-200 text-center">Stream directly in browser</span>
+          </a>
+
           <AdBanner id="e2c3ccf3cbe4f40e454a92dcb87306db" width={300} height={250} />
         </div>
 
@@ -94,20 +106,37 @@ function DownloadContent() {
       </div>
 
       {/* --- SCROLL TRAP: Ad Section 2 --- */}
-      <div className="space-y-8 mb-20">
-        <AdBanner id="40ed9156f9888c91a58a529315843381" width={728} height={90} />
+      <div className="space-y-8 mb-20 w-full flex flex-col items-center">
+        {/* 468x60 Banner */}
+        <AdBanner id="0274e904089e3da604a6b594bb8af186" width={468} height={60} />
 
-        <a 
-          href="https://directyp.org/4/f0162f5d4136842794d17a1f3da5efa7" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="block w-full max-w-[400px] mx-auto bg-orange-600 hover:bg-orange-500 border-2 border-orange-400 rounded-lg p-5 transition-all cursor-pointer text-white shadow-[0_0_15px_rgba(234,88,12,0.3)] text-center"
-        >
-           <span className="font-extrabold text-lg block">▶ PLAY NOW / STREAM</span>
-           <span className="text-xs text-orange-200">No download required</span>
-        </a>
-        
-        <AdNative />
+        <div className="flex flex-col md:flex-row gap-6 items-center w-full max-w-4xl justify-center">
+           {/* 160x600 Skyscraper */}
+           <div className="hidden md:block">
+             <AdBanner id="217fba82f679e08b0290226d299110e2" width={160} height={600} />
+           </div>
+
+           <div className="flex flex-col gap-6 flex-1 items-center">
+             <a 
+               href="https://directyp.org/4/f0162f5d4136842794d17a1f3da5efa7" 
+               target="_blank" 
+               rel="noopener noreferrer"
+               className="block w-full max-w-[400px] bg-orange-600 hover:bg-orange-500 border-2 border-orange-400 rounded-lg p-5 transition-all cursor-pointer text-white shadow-[0_0_15px_rgba(234,88,12,0.3)] text-center"
+             >
+               <span className="font-extrabold text-lg block">▶ PLAY NOW / STREAM</span>
+               <span className="text-xs text-orange-200">No download required</span>
+             </a>
+             
+             <AdNative />
+
+             <AdBanner id="e2c3ccf3cbe4f40e454a92dcb87306db" width={300} height={250} />
+           </div>
+           
+           {/* 160x600 Skyscraper */}
+           <div className="hidden md:block">
+             <AdBanner id="217fba82f679e08b0290226d299110e2" width={160} height={600} />
+           </div>
+        </div>
       </div>
 
       {/* --- SCROLL TRAP: Ad Section 3 --- */}
@@ -161,7 +190,21 @@ function DownloadContent() {
 
 export default function DownloadPage() {
   return (
-    <div className="min-h-screen bg-[#070709] text-white font-sans selection:bg-primary/30">
+    <div className="min-h-screen bg-[#070709] text-white font-sans selection:bg-primary/30 relative">
+      
+      {/* --- FLOATING SIDE ADS (Desktop Only) --- */}
+      <div className="hidden xl:flex fixed top-0 left-4 h-full items-center justify-center z-40 pointer-events-none">
+        <div className="pointer-events-auto">
+          <AdBanner id="217fba82f679e08b0290226d299110e2" width={160} height={600} />
+        </div>
+      </div>
+      
+      <div className="hidden xl:flex fixed top-0 right-4 h-full items-center justify-center z-40 pointer-events-none">
+        <div className="pointer-events-auto">
+          <AdBanner id="217fba82f679e08b0290226d299110e2" width={160} height={600} />
+        </div>
+      </div>
+
       <Suspense fallback={<div className="flex justify-center py-32 text-zinc-500">Loading...</div>}>
         <DownloadContent />
       </Suspense>

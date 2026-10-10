@@ -5,6 +5,7 @@ import Link from "next/link";
 import { FiSearch, FiBell, FiDownload, FiStar, FiChevronRight, FiChevronLeft } from "react-icons/fi";
 import { supabase } from "@/lib/supabase";
 import Navbar from "@/components/Navbar";
+import AdBanner from "@/components/AdBanner";
 
 function MovieRow({ id, title, desc, movies }: { id: string, title: string, desc: string, movies: any[] }) {
   return (
@@ -54,15 +55,7 @@ export default function Home() {
   const [topRated, setTopRated] = useState<any[]>([]);
   const [newPopular, setNewPopular] = useState<any[]>([]);
 
-  const AdBanner = ({ className = "" }: { className?: string }) => (
-    <div className={`w-full bg-zinc-900/50 border border-zinc-800 rounded-lg flex items-center justify-center relative overflow-hidden group ${className}`}>
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
-      <div className="flex flex-col items-center gap-1 text-zinc-600">
-        <span className="text-xs font-semibold uppercase tracking-widest">Advertisement</span>
-        <span className="text-sm">Ad Space Available</span>
-      </div>
-    </div>
-  );
+
 
   useEffect(() => {
     const fetchHomeData = async () => {
@@ -162,8 +155,8 @@ export default function Home() {
         <MovieRow id="movies" title="Movies" desc="Explore top downloaded and critically acclaimed films." movies={moviesList} />
         
         {/* Ad Banner Homepage */}
-        <div className="px-10 md:px-20 lg:px-32 my-6">
-          <AdBanner className="h-28 max-w-5xl mx-auto" />
+        <div className="px-10 md:px-20 lg:px-32 my-10 w-full flex justify-center">
+          <AdBanner id="40ed9156f9888c91a58a529315843381" width={728} height={90} />
         </div>
 
         <MovieRow id="top-rated" title="Top Rated Movies" desc="The highest rated films of all time." movies={topRated} />

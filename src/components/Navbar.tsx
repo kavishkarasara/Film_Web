@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FiSearch, FiBell, FiX, FiPlay } from "react-icons/fi";
+import { FiSearch, FiBell, FiX, FiPlay, FiFilm } from "react-icons/fi";
 import { useState, useEffect } from "react";
 import { ALL_MOVIES } from "@/lib/data";
 
@@ -26,7 +26,10 @@ export default function Navbar() {
     <>
       <nav className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-5 transition-all duration-300 ${scrolled ? 'bg-[#0f0f11]/95 backdrop-blur-md shadow-lg shadow-black/50 border-b border-white/5' : 'bg-gradient-to-b from-black/80 to-transparent backdrop-blur-sm'}`}>
         <div className="flex items-center gap-10">
-          <Link href="/" className="text-2xl font-black tracking-tighter text-primary">CINE<span className="text-white">VAULT</span></Link>
+          <Link href="/" className="text-2xl font-black tracking-tighter text-primary flex items-center gap-2 hover:scale-105 transition-transform">
+            <FiFilm className="text-3xl drop-shadow-[0_0_10px_rgba(163,230,53,0.5)]" />
+            <span>CINE<span className="text-white">VAULT</span></span>
+          </Link>
           <div className="hidden md:flex gap-6 text-sm font-medium text-zinc-400">
             <Link href="/" className="text-white hover:text-white transition-colors">Home</Link>
             <Link href="/#movies" className="hover:text-white transition-colors">Movies</Link>
