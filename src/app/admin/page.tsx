@@ -118,6 +118,39 @@ export default function AdminPanel() {
     fetchMovies();
   };
 
+  const handleAutoFill = async () => {
+    if (!formData.title) {
+      alert("Please enter a movie title first!");
+      return;
+    }
+    
+    try {
+      const response = await fetch(`https://yts.mx/api/v2/list_movies.json?query_term=${encodeURIComponent(formData.title)}`);
+      const data = await response.json();
+      
+      if (data.data && data.data.movies && data.data.movies.length > 0) {
+        const movie = data.data.movies[0]; // get the first result
+        setFormData(prev => ({
+          ...prev,
+          title: movie.title,
+          desc: movie.description_full || movie.synopsis || "",
+          year: movie.year?.toString() || "",
+          rating: movie.rating?.toString() || "",
+          tags: movie.genres ? movie.genres.join(", ") : "",
+          img: movie.large_cover_image || "",
+          backdrop: movie.background_image || ""
+        }));
+        setSuccessMsg(`Auto-filled details for: ${movie.title} ✅`);
+        setTimeout(() => setSuccessMsg(""), 3000);
+      } else {
+        alert("Movie not found in the database. Please fill manually.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to fetch movie details. Please try manually.");
+    }
+  };
+
   const handleEditClick = (movie: any) => {
     setEditingMovieId(movie.id);
     
@@ -236,7 +269,13 @@ export default function AdminPanel() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="col-span-1 md:col-span-2">
                 <label className="block text-sm font-medium text-zinc-400 mb-2">Movie Title</label>
-                <input type="text" required value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} className="w-full bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="e.g. Inception" />
+                <div className="flex gap-2">
+                  <input type="text" required value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} className="flex-1 bg-zinc-950 border border-zinc-800 text-white px-4 py-3 rounded-lg outline-none focus:border-primary transition-colors" placeholder="e.g. Inception" />
+                  <button type="button" onClick={handleAutoFill} className="bg-primary hover:bg-primary/90 text-black px-6 rounded-lg font-bold transition-all shadow-[0_0_15px_rgba(163,230,53,0.3)] flex items-center justify-center whitespace-nowrap">
+                    ✨ Auto Fill
+                  </button>
+                </div>
+                <p className="text-xs text-zinc-500 mt-2">Type the name and click Auto Fill to instantly generate the description, tags, year, and images!</p>
               </div>
 
               <div className="col-span-1 md:col-span-2">

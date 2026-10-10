@@ -156,14 +156,7 @@ export default function MovieDetail() {
             {/* Ad Banner - High CTR location */}
             <AdBanner className="h-24 mb-8" />
 
-            {/* Subtitles */}
-            <div className="flex items-center gap-4 mb-10 p-4 bg-white/5 rounded-lg border border-white/10">
-              <span className="text-sm font-semibold text-zinc-300">Subtitles:</span>
-              <div className="flex gap-2">
-                <button className="px-3 py-1 bg-zinc-800 hover:bg-zinc-700 text-xs rounded transition-colors text-white">English (SRT)</button>
-                <button className="px-3 py-1 bg-zinc-800 hover:bg-zinc-700 text-xs rounded transition-colors text-white">Sinhala (SRT)</button>
-              </div>
-            </div>
+
             
             <div className="flex flex-wrap items-center gap-4 text-sm font-medium mb-8">
               {movie.categories?.map((tag: string, index: number) => (
